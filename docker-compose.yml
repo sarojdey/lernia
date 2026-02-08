@@ -1,0 +1,42 @@
+version: "3.9"
+
+services:
+  # The Vector Database - Stores embeddings of your PDFs
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: lernia-vector-db
+    ports:
+      - "8000:8000"
+    volumes:
+      # Persist data so vectors aren't lost on restart
+      - chroma-data:/chroma/chroma
+    environment:
+      - IS_PERSISTENT=TRUE
+    networks:
+      - lernia-network
+
+  # Local LLM/Embedding Runner - COMMENTED OUT TO USE HOST OLLAMA
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: lernia-ollama
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-data:/root/.ollama
+  #   networks:
+  #     - lernia-network
+
+  # (Optional) We can add the server here later
+  # server:
+  #   build: ./server
+  #   ...
+
+volumes:
+  chroma-data:
+    driver: local
+  ollama-data:
+    driver: local
+
+networks:
+  lernia-network:
+    driver: bridge
