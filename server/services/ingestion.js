@@ -39,14 +39,11 @@ const processDocument = async (filePath) => {
     });
 
     // 3. Store in ChromaDB
-    // We create a new collection or add to existing one.
-    // Collection name: "lernia-collection"
+    // NOTE: You may see "No embedding function configuration found" warnings.
+    // This is normal as LangChain handles embeddings locally via Ollama before sending vectors.
     await Chroma.fromDocuments(chunks, embeddings, {
       collectionName: "lernia-collection",
-      url: "http://localhost:8000", // ChromaDB URL from docker-compose
-      collectionMetadata: {
-        "hnsw:space": "cosine",
-      },
+      url: "http://localhost:8000",
     });
 
     console.log("Successfully stored chunks in ChromaDB.");

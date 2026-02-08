@@ -23,6 +23,8 @@ const embeddings = new OllamaEmbeddings({
 });
 
 // Initialize Vector Store
+// NOTE: You may see "No embedding function configuration found" warnings.
+// This is normal as LangChain handles embeddings locally via Ollama before sending vectors.
 const vectorStore = new Chroma(embeddings, {
   collectionName: "lernia-collection",
   url: "http://localhost:8000",
