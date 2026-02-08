@@ -34,6 +34,23 @@ app.post("/api/ingest", upload.single("file"), async (req, res) => {
   }
 });
 
+// Chat Endpoint
+const { processQuery } = require("./services/chat");
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { query } = req.body;
+    if (!query) {
+      return res.status(400).json({ error: "Query is required" });
+    }
+
+    const result = await processQuery(query);
+    res.json(result);
+  } catch (error) {
+    console.error("Chat failed:", error);
+    res.status(500).json({ error: "Chat failed", details: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
