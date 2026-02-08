@@ -79,3 +79,7 @@ __pycache__/
 
 # OS x
 .DS_Store
+
+# Project specific
+uploads/
+roadmap.md
