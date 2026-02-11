@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Upload, File, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Upload, FileText, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import axios from "axios";
 
 const FileUpload = ({ onUploadSuccess }) => {
@@ -37,7 +37,7 @@ const FileUpload = ({ onUploadSuccess }) => {
 
   const handleFiles = async (file) => {
     if (file.type !== "application/pdf") {
-      setError("Please upload a PDF file.");
+      setError("Invalid format. PDF required.");
       return;
     }
 
@@ -52,33 +52,25 @@ const FileUpload = ({ onUploadSuccess }) => {
       const response = await axios.post(
         "http://localhost:3000/api/ingest",
         formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
+        { headers: { "Content-Type": "multipart/form-data" } }
       );
       onUploadSuccess(response.data);
     } catch (err) {
       console.error(err);
-      setError("Upload failed. Please try again.");
+      setError("Ingestion failed.");
     } finally {
       setUploading(false);
     }
   };
 
-  const onButtonClick = () => {
-    inputRef.current.click();
-  };
-
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8">
+    <div className="w-full shrink-0">
       <div
-        className={`relative p-8 border-2 border-dashed rounded-2xl transition-all duration-300 ${
+        className={`relative flex items-center justify-between p-4 border rounded-lg text-sm transition-all duration-200 ${
           dragActive
-            ? "border-indigo-500 bg-indigo-50/10 scale-[1.02]"
-            : "border-slate-300 hover:border-indigo-400 bg-white/5"
-        } ${uploading ? "pointer-events-none" : ""}`}
+            ? "border-neutral-500 bg-white/5"
+            : "border-white/10 bg-[#0f0f0f] hover:border-white/20"
+        } ${uploading ? "pointer-events-none opacity-70" : ""}`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
         onDragOver={handleDrag}
@@ -92,62 +84,49 @@ const FileUpload = ({ onUploadSuccess }) => {
           onChange={handleChange}
         />
 
-        <div className="flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="flex items-center space-x-3 w-full">
           {uploading ? (
-            <>
-              <Loader2 className="w-12 h-12 text-indigo-500 animate-spin" />
-              <div>
-                <p className="text-lg font-medium text-slate-800">
-                  Uploading {fileName}...
-                </p>
-                <p className="text-sm text-slate-500">
-                  Wait while we digest your knowledge.
-                </p>
-              </div>
-            </>
+            <Loader2 className="w-4 h-4 text-neutral-400 animate-spin" />
           ) : fileName && !error ? (
-            <>
-              <CheckCircle className="w-12 h-12 text-emerald-500" />
-              <div>
-                <p className="text-lg font-medium text-slate-800">
-                  {fileName} Ingested!
-                </p>
-                <button
-                  onClick={onButtonClick}
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700 underline mt-2"
-                >
-                  Upload another?
-                </button>
-              </div>
-            </>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          ) : error ? (
+            <AlertCircle className="w-4 h-4 text-red-500" />
           ) : (
-            <>
-              <div className="p-4 bg-indigo-50 rounded-full">
-                <Upload className="w-8 h-8 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-lg font-medium text-slate-800">
-                  Drag & drop your PDF or{" "}
-                  <button
-                    onClick={onButtonClick}
-                    className="text-indigo-600 hover:underline"
-                  >
-                    browse
-                  </button>
-                </p>
-                <p className="text-sm text-slate-500 mt-1">
-                  Maximum file size: 10MB
-                </p>
-              </div>
-            </>
+            <Upload className="w-4 h-4 text-neutral-500" />
           )}
 
-          {error && (
-            <div className="flex items-center space-x-2 text-rose-500 bg-rose-50 px-4 py-2 rounded-lg mt-4 animate-in fade-in slide-in-from-top-2">
-              <AlertCircle className="w-4 h-4" />
-              <span className="text-sm font-medium">{error}</span>
-            </div>
-          )}
+          <div className="flex-1 flex items-center justify-between">
+            <span className={`font-medium ${error ? 'text-red-400' : 'text-neutral-300'}`}>
+              {uploading
+                ? `Processing ${fileName}...`
+                : fileName && !error
+                ? `${fileName} active`
+                : error
+                ? error
+                : "Drop PDF here or click to browse"}
+            </span>
+
+            {(!uploading && !fileName) || error ? (
+              <button
+                onClick={() => inputRef.current.click()}
+                className="px-3 py-1.5 text-xs font-medium bg-white/5 hover:bg-white/10 border border-white/10 rounded text-neutral-300 transition-colors"
+              >
+                Select File
+              </button>
+            ) : null}
+            
+            {fileName && !uploading && !error && (
+               <button
+               onClick={() => {
+                 setFileName(null);
+                 inputRef.current.click();
+               }}
+               className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors"
+             >
+               Replace
+             </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
