@@ -1,5 +1,4 @@
 import dotenv from "dotenv";
-// Change the import here
 import { ChatGroq } from "@langchain/groq"; 
 import { OllamaEmbeddings } from "@langchain/ollama";
 import { Chroma } from "@langchain/community/vectorstores/chroma";
@@ -12,21 +11,17 @@ import {
 
 dotenv.config();
 
-// 1. Initialize Groq Model
-// Make sure GROQ_API_KEY is in your .env file
 const model = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,
-  model: "llama-3.3-70b-versatile", // Or "mixtral-8x7b-32768"
+  model: "llama-3.3-70b-versatile",
   temperature: 0.7,
 });
 
-// 2. Keep your Embeddings (Must match what you used to ingest the data)
 const embeddings = new OllamaEmbeddings({
   model: "nomic-embed-text",
   baseUrl: "http://localhost:11434",
 });
 
-// 3. Initialize Vector Store (Chroma)
 const vectorStore = new Chroma(embeddings, {
   collectionName: "lernia-collection",
   url: "http://localhost:8000",
@@ -36,27 +31,44 @@ const formatDocumentsAsString = (documents) => {
   return documents.map((document) => document.pageContent).join("\n\n");
 };
 
+// --- SESSION MEMORY STORAGE ---
+// This stays outside the function to remember previous turns
+let chatHistory = [];
+
 export const processQuery = async (query) => {
   try {
     const retriever = vectorStore.asRetriever({ k: 5 });
 
-    const template = `Use the following pieces of context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-Use three sentences maximum and keep the answer as concise as possible.
-Always say "thanks for asking!" at the end of the answer.
+    // Updated template to include {chat_history}
+    const template = `You are a specialist in the data provided. Use the context and conversation history to help the user.
 
-Context: {context}
+CHAT HISTORY:
+{chat_history}
 
-Question: {question}
+NEW CONTEXT:
+{context}
 
-Helpful Answer:`;
+USER QUESTION:
+{question}
+
+RULES:
+1. PURE TEXT ONLY: No stars (*), hashtags (#), or underscores (_). 
+2. STAY ON TOPIC: Only discuss the topic at hand. If the user goes off-topic, politely tell them you can only help with Lernia-related questions.
+3. NO HALLUCINATIONS: If the info isn't in the context, say you don't know. 
+4. NATURAL TONE: Speak like a human colleague. Use line breaks for paragraphs and dashes (-) for lists.
+5. NO BOT INTROS: Do not say "Based on the context."
+
+Response:`;
 
     const prompt = PromptTemplate.fromTemplate(template);
 
-    // 4. LCEL chain remains the same; LangChain handles the abstraction
     const chain = RunnableSequence.from([
       {
+        // Get data from vector store
         context: retriever.pipe(formatDocumentsAsString),
+        // Feed in the current history array as a string
+        chat_history: () => chatHistory.join("\n"),
+        // Pass the question through
         question: new RunnablePassthrough(),
       },
       prompt,
@@ -65,6 +77,17 @@ Helpful Answer:`;
     ]);
 
     const answer = await chain.invoke(query);
+
+    // --- UPDATE HISTORY ---
+    // We save the exchange so the NEXT call knows what happened
+    chatHistory.push(`User: ${query}`);
+    chatHistory.push(`Assistant: ${answer}`);
+
+    // Keep history manageable (last 5 exchanges)
+    if (chatHistory.length > 10) {
+        chatHistory = chatHistory.slice(-10);
+    }
+
     const retrievedDocs = await retriever.invoke(query);
 
     return {
