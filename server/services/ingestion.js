@@ -1,7 +1,7 @@
-const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
-const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
-const { OllamaEmbeddings } = require("@langchain/ollama");
-const { Chroma } = require("@langchain/community/vectorstores/chroma");
+import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { OllamaEmbeddings } from "@langchain/ollama";
+import { Chroma } from "@langchain/community/vectorstores/chroma";
 
 // Initialize Ollama Embeddings
 // Assumes Ollama is running locally on default port 11434 with 'nomic-embed-text' model
@@ -10,7 +10,7 @@ const embeddings = new OllamaEmbeddings({
   baseUrl: "http://localhost:11434",
 });
 
-const processDocument = async (filePath) => {
+export const processDocument = async (filePath) => {
   try {
     console.log(`Starting processing for file: ${filePath}`);
 
@@ -54,4 +54,3 @@ const processDocument = async (filePath) => {
   }
 };
 
-module.exports = { processDocument };

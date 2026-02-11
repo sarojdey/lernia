@@ -1,8 +1,12 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
-const upload = require("./utils/upload");
-const { processDocument } = require("./services/ingestion");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import upload from "./utils/upload.js";
+import { processDocument } from "./services/ingestion.js";
+import { processQuery } from "./services/chat.js";
+
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -35,7 +39,6 @@ app.post("/api/ingest", upload.single("file"), async (req, res) => {
 });
 
 // Chat Endpoint
-const { processQuery } = require("./services/chat");
 app.post("/api/chat", async (req, res) => {
   try {
     const { query } = req.body;

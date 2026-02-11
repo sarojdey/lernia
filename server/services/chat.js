@@ -1,14 +1,16 @@
-require("dotenv").config();
+import dotenv from "dotenv";
 // Change the import here
-const { ChatGroq } = require("@langchain/groq"); 
-const { OllamaEmbeddings } = require("@langchain/ollama");
-const { Chroma } = require("@langchain/community/vectorstores/chroma");
-const { PromptTemplate } = require("@langchain/core/prompts");
-const { StringOutputParser } = require("@langchain/core/output_parsers");
-const {
+import { ChatGroq } from "@langchain/groq"; 
+import { OllamaEmbeddings } from "@langchain/ollama";
+import { Chroma } from "@langchain/community/vectorstores/chroma";
+import { PromptTemplate } from "@langchain/core/prompts";
+import { StringOutputParser } from "@langchain/core/output_parsers";
+import {
   RunnableSequence,
   RunnablePassthrough,
-} = require("@langchain/core/runnables");
+} from "@langchain/core/runnables";
+
+dotenv.config();
 
 // 1. Initialize Groq Model
 // Make sure GROQ_API_KEY is in your .env file
@@ -34,7 +36,7 @@ const formatDocumentsAsString = (documents) => {
   return documents.map((document) => document.pageContent).join("\n\n");
 };
 
-const processQuery = async (query) => {
+export const processQuery = async (query) => {
   try {
     const retriever = vectorStore.asRetriever({ k: 5 });
 
@@ -77,5 +79,3 @@ Helpful Answer:`;
     throw error;
   }
 };
-
-module.exports = { processQuery };
