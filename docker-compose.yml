@@ -16,15 +16,15 @@ services:
       - lernia-network
 
   # Local LLM/Embedding Runner - COMMENTED OUT TO USE HOST OLLAMA
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: lernia-ollama
-  #   ports:
-  #     - "11434:11434"
-  #   volumes:
-  #     - ollama-data:/root/.ollama
-  #   networks:
-  #     - lernia-network
+  ollama:
+    image: ollama/ollama:latest
+    container_name: lernia-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - lernia-network
 
   # (Optional) We can add the server here later
   # server:

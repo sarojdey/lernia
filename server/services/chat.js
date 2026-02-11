@@ -11,7 +11,7 @@ const {
 
 // Initialize Ollama Chat Model
 const model = new ChatOllama({
-  model: "tinyllama",
+  model: "phi3",
   baseUrl: "http://localhost:11434",
   temperature: 0.7,
 });
