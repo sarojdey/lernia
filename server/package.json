@@ -14,6 +14,7 @@
     "@langchain/community": "^1.1.12",
     "@langchain/core": "^1.1.19",
     "@langchain/google-genai": "^2.1.15",
+    "@langchain/groq": "^1.1.0",
     "@langchain/ollama": "^1.2.2",
     "@langchain/textsplitters": "^1.0.1",
     "chromadb": "^3.2.2",
